@@ -73,7 +73,7 @@ contract BatchContract is ProductContract, AccessControl {
         return newBatchId;
     }
 
-    function transferOwnership(uint256 _batchId, uint256 _lotId, address _newOwner) public {
+    function transferOwnership(uint256 _batchId, uint256 _lotId, address _newOwner) public onlyDistributor onlyWholesaler onlyPharmacy {
         require(_newOwner != address(0), "Invalid new owner address.");
         require(lotDetails[_batchId][_lotId].currentOwner == msg.sender, "Only the current owner can transfer ownership.");
 
@@ -84,7 +84,7 @@ contract BatchContract is ProductContract, AccessControl {
     // Update Lot Location
     event LotLocationUpdated(uint256 indexed batchId, uint256 indexed lotId, string newLocation);
 
-    function updateLotLocation(uint256 _batchId, uint256 _lotId, string memory _newLocation) public {
+    function updateLotLocation(uint256 _batchId, uint256 _lotId, string memory _newLocation) public onlyDistributor onlyWholesaler onlyPharmacy {
         require(lotDetails[_batchId][_lotId].currentOwner == msg.sender, "Only the current owner can update location.");
         
         // You can add additional logic here to validate or process the location data if needed
@@ -95,11 +95,9 @@ contract BatchContract is ProductContract, AccessControl {
     // Dispense Lot To Customer
     event LotDispensedToConsumer(uint256 indexed batchId, uint256 indexed lotId, address consumer);
 
-    function dispenseLotToConsumer(uint256 _batchId, uint256 _lotId, address _consumer) public {
+    function dispenseLotToConsumer(uint256 _batchId, uint256 _lotId, address _consumer) public onlyPharmacy {
         require(lotDetails[_batchId][_lotId].currentOwner == msg.sender, "Only the current owner can dispense.");
         require(_consumer != address(0), "Invalid consumer address.");
-        
-        // Additional logic to validate that the caller is a pharmacy or authorized to dispense
         
         lotDetails[_batchId][_lotId].currentOwner = _consumer;
         emit LotDispensedToConsumer(_batchId, _lotId, _consumer);
