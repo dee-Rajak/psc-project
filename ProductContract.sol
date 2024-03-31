@@ -1,7 +1,9 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
-contract ProductContract {
+import "./AccessControl.sol";
+
+contract ProductContract is AccessControl {
     struct Product {
         uint256 id;
         address manufacturer;
@@ -22,7 +24,7 @@ contract ProductContract {
         _;
     }
 
-    function registerProduct(string memory _name, string memory _description, string[] memory _ingredients) public returns (uint256) {
+    function registerProduct(string memory _name, string memory _description, string[] memory _ingredients) public onlyManufacturer returns (uint256) {
         // Input validation
         require(bytes(_name).length > 0, "Product name cannot be empty.");
         require(bytes(_description).length > 0, "Product description cannot be empty.");

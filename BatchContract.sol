@@ -2,8 +2,9 @@
 pragma solidity ^0.8.0;
 
 import "./ProductContract.sol";
+import "./AccessControl.sol";
 
-contract BatchContract is ProductContract {
+contract BatchContract is ProductContract, AccessControl {
     struct Batch {
         uint256 batchId;
         uint256 productId;
@@ -44,7 +45,7 @@ contract BatchContract is ProductContract {
         uint256 _expiryDate,
         uint256 _manufacturingDate,
         uint256 _numLots
-    ) public onlyManufacturer(_productId) returns (uint256) {
+    ) public onlyManufacturer returns (uint256) {
         require(_totalQuantity > 0, "Total quantity must be greater than zero.");
         require(_expiryDate > _manufacturingDate, "Expiry date must be after manufacturing date.");
         require(_numLots > 0, "Number of lots must be greater than zero.");
