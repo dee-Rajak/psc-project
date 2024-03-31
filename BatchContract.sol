@@ -37,4 +37,38 @@ contract BatchContract is ProductContract {
     }
 
     // Add functions for batch and lot creation, ownership transfers, etc.
+
+    function createBatch(
+        uint256 _productId,
+        uint256 _totalQuantity,
+        uint256 _expiryDate,
+        uint256 _manufacturingDate,
+        uint256 _numLots
+    ) public onlyManufacturer(_productId) returns (uint256) {
+        require(_totalQuantity > 0, "Total quantity must be greater than zero.");
+        require(_expiryDate > _manufacturingDate, "Expiry date must be after manufacturing date.");
+        require(_numLots > 0, "Number of lots must be greater than zero.");
+
+        uint256 newBatchId = batchCount++;
+        batches[newBatchId] = Batch(
+            newBatchId,
+            _productId,
+            _totalQuantity,
+            _expiryDate,
+            _manufacturingDate
+        );
+
+        uint256 lotQuantity = _totalQuantity / _numLots;
+        for (uint256 i = 0; i < _numLots; i++) {
+            uint256 newLotId = lotCount++;
+            batchLots[newBatchId].push(
+                Lot(newLotId, newBatchId, lotQuantity, msg.sender)
+            );
+            lotDetails[newBatchId][newLotId] = Lot(newLotId, newBatchId, lotQuantity, msg.sender);
+            emit LotCreated(newBatchId, newLotId, lotQuantity);
+        }
+
+        emit BatchCreated(newBatchId, _productId, _totalQuantity);
+        return newBatchId;
+    }
 }
