@@ -3,8 +3,9 @@ pragma solidity ^0.8.0;
 
 import "./ProductContract.sol";
 import "./AccessControl.sol";
+import "./TraceabilityContract.sol";
 
-contract BatchContract is ProductContract, AccessControl {
+contract BatchContract is ProductContract, AccessControl, TraceabilityContract {
     struct Batch {
         uint256 batchId;
         uint256 productId;
@@ -73,6 +74,7 @@ contract BatchContract is ProductContract, AccessControl {
         }
 
         emit BatchCreated(newBatchId, _productId, _totalQuantity);
+        addTraceabilityData(newBatchId, newLotId, "Manufactured");
         return newBatchId;
     }
 
@@ -81,6 +83,7 @@ contract BatchContract is ProductContract, AccessControl {
         require(lotDetails[_batchId][_lotId].currentOwner == msg.sender, "Only the current owner can transfer ownership.");
 
         lotDetails[_batchId][_lotId].currentOwner = _newOwner;
+        addTraceabilityData(_batchId, _lotId, "Ownership Transferred");
         emit OwnershipTransferred(_batchId, _lotId, _newOwner);
     }
 
@@ -91,7 +94,7 @@ contract BatchContract is ProductContract, AccessControl {
         require(lotDetails[_batchId][_lotId].currentOwner == msg.sender, "Only the current owner can update location.");
         
         // You can add additional logic here to validate or process the location data if needed
-        
+        addTraceabilityData(_batchId, _lotId, _newLocation);
         emit LotLocationUpdated(_batchId, _lotId, _newLocation);
     }
 
