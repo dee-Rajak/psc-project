@@ -11,6 +11,7 @@ contract BatchContract is ProductContract, AccessControl {
         uint256 totalQuantity;
         uint256 expiryDate;
         uint256 manufacturingDate;
+        string qrCodeUrl;
         // Add more batch details as needed
     }
 
@@ -44,7 +45,8 @@ contract BatchContract is ProductContract, AccessControl {
         uint256 _totalQuantity,
         uint256 _expiryDate,
         uint256 _manufacturingDate,
-        uint256 _numLots
+        uint256 _numLots,
+        string memory _qrCodeUrl
     ) public onlyManufacturer returns (uint256) {
         require(_totalQuantity > 0, "Total quantity must be greater than zero.");
         require(_expiryDate > _manufacturingDate, "Expiry date must be after manufacturing date.");
@@ -56,7 +58,8 @@ contract BatchContract is ProductContract, AccessControl {
             _productId,
             _totalQuantity,
             _expiryDate,
-            _manufacturingDate
+            _manufacturingDate,
+            _qrCodeUrl
         );
 
         uint256 lotQuantity = _totalQuantity / _numLots;
