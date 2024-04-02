@@ -148,4 +148,52 @@ contract StakeholderManager is AccessControl {
             stakeholder.detailsIPFSHash
         );
     }
+
+    // RBAC Modifiers
+    modifier onlyManufacturer() {
+        require(hasRole(MANUFACTURER_ROLE, msg.sender), "Caller is not a manufacturer");
+        _;
+    }
+
+    modifier onlyDistributor() {
+        require(hasRole(DISTRIBUTOR_ROLE, msg.sender), "Caller is not a distributor");
+        _;
+    }
+
+    modifier onlyWholesaler() {
+        require(hasRole(WHOLESALER_ROLE, msg.sender), "Caller is not a wholesaler");
+        _;
+    }
+
+    modifier onlyPharmacy() {
+        require(hasRole(PHARMACY_ROLE, msg.sender), "Caller is not a pharmacy");
+        _;
+    }
+
+    modifier onlyConsumer() {
+        require(hasRole(CONSUMER_ROLE, msg.sender), "Caller is not a consumer");
+        _;
+    }
+
+    // RBAC Functions
+    function isManufacturer(address account) public view returns (bool) {
+        return hasRole(MANUFACTURER_ROLE, account);
+    }
+
+    function isDistributor(address account) public view returns (bool) {
+        return hasRole(DISTRIBUTOR_ROLE, account);
+    }
+
+    function isWholesaler(address account) public view returns (bool) {
+        return hasRole(WHOLESALER_ROLE, account);
+    }
+
+    function isPharmacy(address account) public view returns (bool) {
+        return hasRole(PHARMACY_ROLE, account);
+    }
+
+    function isConsumer(address account) public view returns (bool) {
+        return hasRole(CONSUMER_ROLE, account);
+    }
+
 }
