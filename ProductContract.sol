@@ -10,6 +10,7 @@ contract ProductContract is AccessControl {
         string name;
         string description;
         string[] ingredients;
+        string imageUrl;
         // Additional product details can be added here
     }
 
@@ -23,8 +24,9 @@ contract ProductContract is AccessControl {
         require(products[productId].manufacturer == msg.sender, "Only the manufacturer can perform this action.");
         _;
     }
+    
 
-    function registerProduct(string memory _name, string memory _description, string[] memory _ingredients) public onlyManufacturer returns (uint256) {
+    function registerProduct(string memory _name, string memory _description, string[] memory _ingredients, string memory _imageUrl) public onlyManufacturer returns (uint256) {
         // Input validation
         require(bytes(_name).length > 0, "Product name cannot be empty.");
         require(bytes(_description).length > 0, "Product description cannot be empty.");
