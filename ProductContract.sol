@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
-import "./AccessControl.sol";
+import "./AccessControlContract.sol";
 
-contract ProductContract is AccessControl {
+contract ProductContract is AccessControlContract {
     struct Product {
         uint256 id;
         address manufacturer;
@@ -11,7 +11,6 @@ contract ProductContract is AccessControl {
         string description;
         string[] ingredients;
         string imageUrl;
-        // Additional product details can be added here
     }
 
     mapping(uint256 => Product) public products;
@@ -20,26 +19,25 @@ contract ProductContract is AccessControl {
 
     event ProductRegistered(uint256 indexed productId, address indexed manufacturer);
 
-    modifier onlyManufacturer(uint256 productId) {
-        require(products[productId].manufacturer == msg.sender, "Only the manufacturer can perform this action.");
-        _;
-    }
-    
-
-    function registerProduct(string memory _name, string memory _description, string[] memory _ingredients, string memory _imageUrl) public onlyManufacturer returns (uint256) {
-        // Input validation
-        require(bytes(_name).length > 0, "Product name cannot be empty.");
-        require(bytes(_description).length > 0, "Product description cannot be empty.");
-        require(_ingredients.length > 0, "At least one ingredient must be provided.");
-
+    function registerProduct(
+        string memory _name,
+        string memory _description,
+        string[] memory _ingredients,
+        string memory _imageUrl
+    ) public onlyManufacturer returns (uint256) {
         uint256 newProductId = productCount++;
-        products[newProductId] = Product(newProductId, msg.sender, _name, _description, _ingredients);
+        products[newProductId] = Product(
+            newProductId,
+            msg.sender,
+            _name,
+            _description,
+            _ingredients,
+            _imageUrl
+        );
         manufacturerProducts[msg.sender].push(newProductId);
 
         emit ProductRegistered(newProductId, msg.sender);
 
         return newProductId;
     }
-
-    // Add other functions for product management if needed
 }

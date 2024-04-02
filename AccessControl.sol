@@ -1,110 +1,66 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
-import "@openzeppelin/contracts/access/Roles.sol";
+import "@openzeppelin/contracts/access/AccessControl.sol";
 
-contract AccessControl {
-    using Roles for Roles.Role;
-
-    Roles.Role private manufacturerRole;
-    Roles.Role private distributorRole;
-    Roles.Role private wholesalerRole;
-    Roles.Role private pharmacyRole;
-
-    event ManufacturerAdded(address indexed account);
-    event ManufacturerRemoved(address indexed account);
-    event DistributorAdded(address indexed account);
-    event DistributorRemoved(address indexed account);
-    event WholesalerAdded(address indexed account);
-    event WholesalerRemoved(address indexed account);
-    event PharmacyAdded(address indexed account);
-    event PharmacyRemoved(address indexed account);
+contract AccessControlContract is AccessControl {
+    bytes32 public constant MANUFACTURER_ROLE = keccak256("MANUFACTURER_ROLE");
+    bytes32 public constant DISTRIBUTOR_ROLE = keccak256("DISTRIBUTOR_ROLE");
+    bytes32 public constant WHOLESALER_ROLE = keccak256("WHOLESALER_ROLE");
+    bytes32 public constant PHARMACY_ROLE = keccak256("PHARMACY_ROLE");
 
     constructor() {
-        // Add your own logic for initial role assignments, if needed
+        _setupRole(DEFAULT_ADMIN_ROLE, msg.sender);
     }
 
     modifier onlyManufacturer() {
-        require(isManufacturer(msg.sender), "Caller is not a manufacturer");
+        require(hasRole(MANUFACTURER_ROLE, msg.sender), "Caller is not a manufacturer");
         _;
     }
 
     modifier onlyDistributor() {
-        require(isDistributor(msg.sender), "Caller is not a distributor");
+        require(hasRole(DISTRIBUTOR_ROLE, msg.sender), "Caller is not a distributor");
         _;
     }
 
     modifier onlyWholesaler() {
-        require(isWholesaler(msg.sender), "Caller is not a wholesaler");
+        require(hasRole(WHOLESALER_ROLE, msg.sender), "Caller is not a wholesaler");
         _;
     }
 
     modifier onlyPharmacy() {
-        require(isPharmacy(msg.sender), "Caller is not a pharmacy");
+        require(hasRole(PHARMACY_ROLE, msg.sender), "Caller is not a pharmacy");
         _;
     }
 
-    function addManufacturer(address account) public {
-        // Add your own logic for authorization checks
-        manufacturerRole.add(account);
-        emit ManufacturerAdded(account);
+    function addManufacturer(address account) public onlyRole(DEFAULT_ADMIN_ROLE) {
+        grantRole(MANUFACTURER_ROLE, account);
     }
 
-    function removeManufacturer(address account) public {
-        // Add your own logic for authorization checks
-        manufacturerRole.remove(account);
-        emit ManufacturerRemoved(account);
+    function removeManufacturer(address account) public onlyRole(DEFAULT_ADMIN_ROLE) {
+        revokeRole(MANUFACTURER_ROLE, account);
+    }
+    function addDistributor(address account) public onlyRole(DEFAULT_ADMIN_ROLE) {
+        grantRole(DISTRIBUTOR_ROLE, account);
     }
 
-    function addDistributor(address account) public {
-        // Add your own logic for authorization checks
-        distributorRole.add(account);
-        emit DistributorAdded(account);
+    function removeDistributor(address account) public onlyRole(DEFAULT_ADMIN_ROLE) {
+        revokeRole(DISTRIBUTOR_ROLE, account);
+    }
+    function addWholesaler(address account) public onlyRole(DEFAULT_ADMIN_ROLE) {
+        grantRole(WHOLESALER_ROLE, account);
     }
 
-    function removeDistributor(address account) public {
-        // Add your own logic for authorization checks
-        distributorRole.remove(account);
-        emit DistributorRemoved(account);
+    function removeWholesaler(address account) public onlyRole(DEFAULT_ADMIN_ROLE) {
+        revokeRole(WHOLESALER_ROLE, account);
+    }
+    function addPharmacy(address account) public onlyRole(DEFAULT_ADMIN_ROLE) {
+        grantRole(PHARMACY_ROLE, account);
     }
 
-    function addWholesaler(address account) public {
-        // Add your own logic for authorization checks
-        wholesalerRole.add(account);
-        emit WholesalerAdded(account);
+    function removePharmacy(address account) public onlyRole(DEFAULT_ADMIN_ROLE) {
+        revokeRole(PHARMACY_ROLE, account);
     }
 
-    function removeWholesaler(address account) public {
-        // Add your own logic for authorization checks
-        wholesalerRole.remove(account);
-        emit WholesalerRemoved(account);
-    }
-
-    function addPharmacy(address account) public {
-        // Add your own logic for authorization checks
-        pharmacyRole.add(account);
-        emit PharmacyAdded(account);
-    }
-
-    function removePharmacy(address account) public {
-        // Add your own logic for authorization checks
-        pharmacyRole.remove(account);
-        emit PharmacyRemoved(account);
-    }
-
-    function isManufacturer(address account) public view returns (bool) {
-        return manufacturerRole.has(account);
-    }
-
-    function isDistributor(address account) public view returns (bool) {
-        return distributorRole.has(account);
-    }
-
-    function isWholesaler(address account) public view returns (bool) {
-        return wholesalerRole.has(account);
-    }
-
-    function isPharmacy(address account) public view returns (bool) {
-        return pharmacyRole.has(account);
-    }
+    // Similar functions for Distributor, Wholesaler, and Pharmacy roles
 }
