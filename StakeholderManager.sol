@@ -7,7 +7,7 @@ import "@openzeppelin/contracts/utils/Strings.sol";
 contract StakeholderManager is AccessControl {
     using Strings for uint256;
 
-    bytes32 public constant ADMIN_ROLE = keccak256("ADMIN_ROLE");
+    // bytes32 public constant DEFAULT_ADMIN_ROLE = keccak256("DEFAULT_ADMIN_ROLE");
     bytes32 public constant MANUFACTURER_ROLE = keccak256("MANUFACTURER_ROLE");
     bytes32 public constant DISTRIBUTOR_ROLE = keccak256("DISTRIBUTOR_ROLE");
     bytes32 public constant WHOLESALER_ROLE = keccak256("WHOLESALER_ROLE");
@@ -35,7 +35,7 @@ contract StakeholderManager is AccessControl {
     event StakeholderRemoved(address indexed stakeholder, bytes32 indexed role);
 
     constructor() {
-        _grantRole(ADMIN_ROLE, msg.sender);
+        _grantRole(DEFAULT_ADMIN_ROLE, msg.sender);
     }
 
     function registerStakeholder(
@@ -47,7 +47,7 @@ contract StakeholderManager is AccessControl {
         string memory detailsIPFSHash
     ) public {
         require(!hasRole(role, msg.sender), "Stakeholder already registered");
-        require(!hasRole(ADMIN_ROLE, msg.sender) || role == ADMIN_ROLE, "Admin cannot register for additional roles");
+        require(!hasRole(DEFAULT_ADMIN_ROLE, msg.sender) || role == DEFAULT_ADMIN_ROLE, "Admin cannot register for additional roles");
         require(!isInRegistrationQueue[msg.sender], "Stakeholder already in registration queue");
         bytes32 hashedPassword = keccak256(abi.encodePacked(password));
         bool isApproved = role == CONSUMER_ROLE;
@@ -60,7 +60,7 @@ contract StakeholderManager is AccessControl {
             location,
             detailsIPFSHash
         );
-        if (role != ADMIN_ROLE) {
+        if (role != DEFAULT_ADMIN_ROLE) {
             registrationQueue.push(msg.sender);
             isInRegistrationQueue[msg.sender] = true;
         }
@@ -80,7 +80,7 @@ contract StakeholderManager is AccessControl {
         string memory detailsIPFSHash
     ) public {
         require(isInRegistrationQueue[msg.sender], "Stakeholder not in registration queue");
-        require(!hasRole(ADMIN_ROLE, msg.sender) || role == ADMIN_ROLE, "Admin cannot update registration");
+        require(!hasRole(DEFAULT_ADMIN_ROLE, msg.sender) || role == DEFAULT_ADMIN_ROLE, "Admin cannot update registration");
         bytes32 hashedPassword = keccak256(abi.encodePacked(password));
         stakeholders[msg.sender] = Stakeholder(
             name,
@@ -94,7 +94,7 @@ contract StakeholderManager is AccessControl {
         emit StakeholderRegistered(msg.sender, role);
     }
 
-    function approveStakeholder(address stakeholder) public onlyRole(ADMIN_ROLE) {
+    function approveStakeholder(address stakeholder) public onlyRole(DEFAULT_ADMIN_ROLE) {
         require(!stakeholders[stakeholder].approved, "Stakeholder already approved");
         stakeholders[stakeholder].approved = true;
         _grantRole(stakeholders[stakeholder].role, stakeholder);
@@ -102,7 +102,7 @@ contract StakeholderManager is AccessControl {
         emit StakeholderApproved(stakeholder, stakeholders[stakeholder].role);
     }
 
-    function removeStakeholder(address stakeholder) public onlyRole(ADMIN_ROLE) {
+    function removeStakeholder(address stakeholder) public onlyRole(DEFAULT_ADMIN_ROLE) {
         require(hasRole(stakeholders[stakeholder].role, stakeholder), "Stakeholder not registered");
         _revokeRole(stakeholders[stakeholder].role, stakeholder);
         emit StakeholderRemoved(stakeholder, stakeholders[stakeholder].role);
@@ -117,18 +117,18 @@ contract StakeholderManager is AccessControl {
         return stakeholdersByRole[role];
     }
 
-    function getRegistrationQueueCount() public view onlyRole(ADMIN_ROLE) returns (uint256) {
+    function getStakeholderRegistrationQueueCount() public view onlyRole(DEFAULT_ADMIN_ROLE) returns (uint256) {
         return registrationQueue.length;
     }
 
-    function getRegistrationQueueAddresses() public view onlyRole(ADMIN_ROLE) returns (address[] memory) {
+    function getRegistrationQueueAddresses() public view onlyRole(DEFAULT_ADMIN_ROLE) returns (address[] memory) {
         return registrationQueue;
     }
 
     function getStakeholderDetails(address stakeholderAddress)
         public
         view
-        onlyRole(ADMIN_ROLE)
+        onlyRole(DEFAULT_ADMIN_ROLE)
         returns (
             string memory,
             string memory,
@@ -149,7 +149,20 @@ contract StakeholderManager is AccessControl {
         );
     }
 
+    function grantAdminRole(address account) public onlyRole(DEFAULT_ADMIN_ROLE) {
+        grantRole(DEFAULT_ADMIN_ROLE, account);
+    }
+
+    function revokeAdminRole(address account) public onlyRole(DEFAULT_ADMIN_ROLE) {
+        revokeRole(DEFAULT_ADMIN_ROLE, account);
+    }
+
     // RBAC Modifiers
+    modifier onlyAdmin() {
+        require(hasRole(DEFAULT_ADMIN_ROLE, msg.sender), "Caller is not an admin");
+        _;
+    }
+
     modifier onlyManufacturer() {
         require(hasRole(MANUFACTURER_ROLE, msg.sender), "Caller is not a manufacturer");
         _;
